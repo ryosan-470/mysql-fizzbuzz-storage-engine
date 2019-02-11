@@ -28,5 +28,5 @@ WORKDIR /opt
 RUN git clone --single-branch --branch mysql-8.0.14 --depth 1 https://github.com/mysql/mysql-server.git
 WORKDIR /opt/mysql-server
 # build mysql-server
-RUN cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp/boost -DFORCE_INSOURCE_BUILD=1
+RUN cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp/boost -DFORCE_INSOURCE_BUILD=1 -DWITH_DEBUG=1
 ADD dev/*.sh ./
