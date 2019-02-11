@@ -7,6 +7,6 @@ docker:
 			--rm \
 			--name dev-mysql \
 			-it \
-			-v $(PWD)/src:/opt/mysql-server/storage/example \
+			-v $(PWD)/src:/opt/mysql-server/storage \
 			${IMAGE_NAME} \
 			/bin/bash
