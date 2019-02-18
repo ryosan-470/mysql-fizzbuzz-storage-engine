@@ -84,7 +84,7 @@
   ha_fizzbuzz::open() would also have been necessary. Calls to
   ha_fizzbuzz::extra() are hints as to what will be occuring to the request.
 
-  A Longer Example can be found called the "Skeleton Engine" which can be
+  A Longer Fizbuzz can be found called the "Skeleton Engine" which can be
   found on TangentOrg. It has both an engine and a full build environment
   for building a pluggable storage engine.
 
@@ -110,7 +110,7 @@ static bool fizzbuzz_is_supported_system_table(const char *db,
                                               const char *table_name,
                                               bool is_sql_layer_system_table);
 
-Example_share::Example_share() { thr_lock_init(&lock); }
+Fizbuzz_share::Fizbuzz_share() { thr_lock_init(&lock); }
 
 static int fizzbuzz_init_func(void *p) {
   DBUG_ENTER("fizzbuzz_init_func");
@@ -126,20 +126,20 @@ static int fizzbuzz_init_func(void *p) {
 
 /**
   @brief
-  Example of simple lock controls. The "share" it creates is a
+  Fizbuzz of simple lock controls. The "share" it creates is a
   structure we will pass to each fizzbuzz handler. Do you have to have
   one of these? Well, you have pieces that are used for locking, and
   they are needed to function.
 */
 
-Example_share *ha_fizzbuzz::get_share() {
-  Example_share *tmp_share;
+Fizbuzz_share *ha_fizzbuzz::get_share() {
+  Fizbuzz_share *tmp_share;
 
   DBUG_ENTER("ha_fizzbuzz::get_share()");
 
   lock_shared_ha_data();
-  if (!(tmp_share = static_cast<Example_share *>(get_ha_share_ptr()))) {
-    tmp_share = new Example_share;
+  if (!(tmp_share = static_cast<Fizbuzz_share *>(get_ha_share_ptr()))) {
+    tmp_share = new Fizbuzz_share;
     if (!tmp_share) goto err;
 
     set_ha_share_ptr(static_cast<Handler_share *>(tmp_share));
@@ -252,7 +252,7 @@ int ha_fizzbuzz::close(void) {
   information to extract the data from the native byte array type.
 
   @details
-  Example of this would be:
+  Fizbuzz of this would be:
   @code
   for (Field **field=table->field ; *field ; field++)
   {
@@ -278,7 +278,7 @@ int ha_fizzbuzz::close(void) {
 int ha_fizzbuzz::write_row(uchar *) {
   DBUG_ENTER("ha_fizzbuzz::write_row");
   /*
-    Example of a successful write_row. We don't store the data
+    Fizbuzz of a successful write_row. We don't store the data
     anywhere; they are thrown away. A real implementation will
     probably need to do something with 'buf'. We report a success
     here, to pretend that the insert was successful.
@@ -892,7 +892,7 @@ mysql_declare_plugin(fizzbuzz){
     &fizzbuzz_storage_engine,
     "FIZZBUZZ",
     "Brian Aker, MySQL AB",
-    "Example storage engine",
+    "Fizbuzz storage engine",
     PLUGIN_LICENSE_GPL,
     fizzbuzz_init_func, /* Plugin Init */
     NULL,              /* Plugin check uninstall */
