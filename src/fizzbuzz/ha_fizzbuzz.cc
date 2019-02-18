@@ -92,12 +92,16 @@
     -Brian
 */
 
-#include "storage/fizzbuzz/ha_fizzbuzz.h"
+#include <string>
+
+#include "ha_fizzbuzz.h"
 
 #include "my_dbug.h"
 #include "mysql/plugin.h"
 #include "sql/sql_class.h"
 #include "sql/sql_plugin.h"
+#include "sql/field.h"
+#include "sql/table.h"
 #include "typelib.h"
 
 static handler *fizzbuzz_create_handler(handlerton *hton, TABLE_SHARE *table,
@@ -428,6 +432,9 @@ int ha_fizzbuzz::index_last(uchar *) {
 */
 int ha_fizzbuzz::rnd_init(bool) {
   DBUG_ENTER("ha_fizzbuzz::rnd_init");
+  now_pos = 0;
+  stop = false;
+  stats.records = 0;
   DBUG_RETURN(0);
 }
 
@@ -451,10 +458,50 @@ int ha_fizzbuzz::rnd_end() {
   filesort.cc, records.cc, sql_handler.cc, sql_select.cc, sql_table.cc and
   sql_update.cc
 */
-int ha_fizzbuzz::rnd_next(uchar *) {
+int ha_fizzbuzz::rnd_next(uchar *buf) {
   int rc;
   DBUG_ENTER("ha_fizzbuzz::rnd_next");
-  rc = HA_ERR_END_OF_FILE;
+  // bufを0埋めする
+  memset(buf, 0, table->s->null_bytes);
+
+  if (now_pos < 100) {
+    ++now_pos;
+
+    DBUG_PRINT("info", ("now_pos: %d", now_pos));
+    // フィールドごとに演算の対応を行う
+    for (Field **field = table->field; *field; field++) {
+      buffer.length(0);
+
+      // fizzbuzz の判定
+      if (now_pos % 3 == 0 && now_pos % 5 == 0) {
+        for (const char* p = "fizzbuzz"; *p; ++p) {
+          buffer.append(*p);
+        }
+      } else if (now_pos % 3 == 0) {
+        for (const char* p = "fizz"; *p; ++p) {
+          buffer.append(*p);
+        }
+      } else if (now_pos % 5 == 0) {
+        for (const char* p = "buzz"; *p; ++p) {
+          buffer.append(*p);
+        }
+      } else {
+        std::string s = std::to_string(now_pos);
+        for (const char* p = s.data(); *p; ++p) {
+          buffer.append(*p);
+        }
+      }
+      (*field)->store(buffer.ptr(), buffer.length(), buffer.charset(), CHECK_FIELD_IGNORE);
+    }
+    rc = 0;
+    stats.records++;
+    goto end;
+  } else {
+    rc = HA_ERR_END_OF_FILE;
+    goto end;
+  }
+
+ end:
   DBUG_RETURN(rc);
 }
 

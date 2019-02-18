@@ -44,6 +44,7 @@
 #include "my_compiler.h"
 #include "my_inttypes.h"
 #include "sql/handler.h" /* handler */
+#include "sql_string.h"
 #include "thr_lock.h"    /* THR_LOCK, THR_LOCK_DATA */
 
 /** @brief
@@ -64,6 +65,10 @@ class ha_fizzbuzz : public handler {
   THR_LOCK_DATA lock;          ///< MySQL lock
   Fizbuzz_share *share;        ///< Shared lock info
   Fizbuzz_share *get_share();  ///< Get the share
+
+  String buffer;
+  int now_pos;
+  bool stop;
 
  public:
   ha_fizzbuzz(handlerton *hton, TABLE_SHARE *table_arg);
