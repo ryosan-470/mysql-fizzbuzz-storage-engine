@@ -2,7 +2,7 @@
 Reference: https://dev.mysql.com/doc/internals/en/custom-engine.html
 
 # Motivation
-To unserstand the MySQL storage engine insight.
+To understand the MySQL storage engine insight.
 
 ## Support
 
