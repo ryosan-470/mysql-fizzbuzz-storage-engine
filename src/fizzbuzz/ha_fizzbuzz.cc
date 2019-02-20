@@ -385,8 +385,13 @@ int ha_fizzbuzz::update_row(const uchar *, uchar *) {
 */
 
 int ha_fizzbuzz::delete_row(const uchar *) {
+  int rc = 0;
   DBUG_ENTER("ha_fizzbuzz::delete_row");
-  DBUG_RETURN(HA_ERR_WRONG_COMMAND);
+
+  stored_records.erase(stored_records.begin()+stats.records-1);
+  stats.records--;
+
+  DBUG_RETURN(rc);
 }
 
 /**
