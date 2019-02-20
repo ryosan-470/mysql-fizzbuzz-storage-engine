@@ -102,7 +102,7 @@ class ha_fizzbuzz : public handler {
       an engine that can only handle statement-based logging. This is
       used in testing.
     */
-    return HA_BINLOG_STMT_CAPABLE;
+    return HA_BINLOG_STMT_CAPABLE | HA_BINLOG_ROW_CAPABLE;
   }
 
   /** @brief

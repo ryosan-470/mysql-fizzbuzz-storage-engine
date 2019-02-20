@@ -287,6 +287,17 @@ int ha_fizzbuzz::write_row(uchar *) {
     probably need to do something with 'buf'. We report a success
     here, to pretend that the insert was successful.
   */
+
+  char attribute_buffer[1024];
+  String attribute(attribute_buffer, sizeof(attribute_buffer), &my_charset_bin);
+
+  buffer.length(0);
+  for (Field **field = table->field; *field; field++) {
+    // 値を受け取る
+    (*field)->val_str(&attribute, &attribute);
+    buffer.append(attribute);
+  }
+  stats.records++;
   DBUG_RETURN(0);
 }
 
