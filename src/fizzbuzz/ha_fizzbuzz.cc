@@ -305,11 +305,10 @@ int ha_fizzbuzz::write_row(uchar *) {
     here, to pretend that the insert was successful.
   */
 
-  for (Field **field = table->field; *field; field++) {
-    // 値を受け取る
-    std::string val = fizzbuzz(stats.records);
-    stored_records.push_back(val);
-  }
+  buffer.length(0);
+  std::string val = fizzbuzz(stats.records);
+  stored_records.push_back(val);
+
   stats.records++;
   DBUG_RETURN(0);
 }
