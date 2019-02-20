@@ -307,6 +307,12 @@ int ha_fizzbuzz::write_row(uchar *) {
 
   buffer.length(0);
   std::string val = fizzbuzz(stats.records);
+  for (Field **field = table->field; *field; field++) {
+    for (const char &c : val) {
+      buffer.append(c);
+    }
+    buffer.append('\0');
+  }
   stored_records.push_back(val);
 
   stats.records++;
@@ -338,7 +344,24 @@ int ha_fizzbuzz::write_row(uchar *) {
 */
 int ha_fizzbuzz::update_row(const uchar *, uchar *) {
   DBUG_ENTER("ha_fizzbuzz::update_row");
-  DBUG_RETURN(HA_ERR_WRONG_COMMAND);
+  int rc = 0;
+
+  buffer.length(0);
+  for (Field **field = table->field; *field; field++) {
+    char attribute_buffer[1024];
+    String attribute(attribute_buffer, sizeof(attribute_buffer), &my_charset_bin);
+
+    // Get value from field
+    (*field)->val_str(&attribute, &attribute);
+    buffer.append(attribute);
+    buffer.append('\0');
+  }
+
+  std::string s(buffer.ptr(), buffer.ptr() + buffer.length());
+  // update
+  stored_records[stats.records-1] = s;
+
+  DBUG_RETURN(rc);
 }
 
 /**
@@ -482,6 +505,7 @@ int ha_fizzbuzz::rnd_end() {
   sql_update.cc
 */
 int ha_fizzbuzz::rnd_next(uchar *buf) {
+  int offset = 0;
   int rc;
   DBUG_ENTER("ha_fizzbuzz::rnd_next");
   // bufを0埋めする
@@ -489,12 +513,15 @@ int ha_fizzbuzz::rnd_next(uchar *buf) {
 
   if (stats.records < stored_records.size()) {
     // フィールドごとに演算の対応を行う
+    const auto &record = stored_records[stats.records];
     for (Field **field = table->field; *field; field++) {
       buffer.length(0);
-      for (auto c : stored_records[stats.records]) {
-        buffer.append(c);
+
+      for (int i = 0; i < (int)record.length() && record[offset+i]; i++) {
+        buffer.append(record[offset+i]);
       }
       (*field)->store(buffer.ptr(), buffer.length(), buffer.charset(), CHECK_FIELD_IGNORE);
+      offset += buffer.length();
     }
     rc = 0;
     stats.records++;
