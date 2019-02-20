@@ -308,6 +308,9 @@ int ha_fizzbuzz::write_row(uchar *) {
   buffer.length(0);
   std::string val = fizzbuzz(stats.records);
   for (Field **field = table->field; *field; field++) {
+    for (const char &c : val) {
+      buffer.append(c);
+    }
     buffer.append('\0');
   }
   stored_records.push_back(val);
