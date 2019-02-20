@@ -251,6 +251,21 @@ int ha_fizzbuzz::close(void) {
   DBUG_RETURN(0);
 }
 
+std::string fizzbuzz(int now) {
+  if (now == 0) {
+    return std::to_string(now);
+  }
+  if (now % 3 == 0 && now % 5 == 0) {
+    return "fizzbuzz";
+  } else if (now % 3 == 0) {
+    return "fizz";
+  } else if (now % 5 == 0) {
+    return "buzz";
+  } else {
+    return std::to_string(now);
+  }
+}
+
 /**
   @brief
   write_row() inserts a row. No extra() hint is given currently if a bulk load
@@ -291,12 +306,9 @@ int ha_fizzbuzz::write_row(uchar *) {
   */
 
   for (Field **field = table->field; *field; field++) {
-    char attribute_buffer[1024];
-    String attribute(attribute_buffer, sizeof(attribute_buffer), &my_charset_bin);
     // 値を受け取る
-    (*field)->val_str(&attribute, &attribute);
-    std::string s(attribute.ptr(), attribute.ptr() + attribute.length());
-    stored_records.push_back(s);
+    std::string val = fizzbuzz(stats.records);
+    stored_records.push_back(val);
   }
   stats.records++;
   DBUG_RETURN(0);
