@@ -93,6 +93,8 @@
 */
 
 #include <string>
+#include <vector>
+#include <cstdio>
 
 #include "ha_fizzbuzz.h"
 
@@ -288,14 +290,13 @@ int ha_fizzbuzz::write_row(uchar *) {
     here, to pretend that the insert was successful.
   */
 
-  char attribute_buffer[1024];
-  String attribute(attribute_buffer, sizeof(attribute_buffer), &my_charset_bin);
-
-  buffer.length(0);
   for (Field **field = table->field; *field; field++) {
+    char attribute_buffer[1024];
+    String attribute(attribute_buffer, sizeof(attribute_buffer), &my_charset_bin);
     // 値を受け取る
     (*field)->val_str(&attribute, &attribute);
-    buffer.append(attribute);
+    std::string s(attribute.ptr(), attribute.ptr() + attribute.length());
+    stored_records.push_back(s);
   }
   stats.records++;
   DBUG_RETURN(0);
@@ -475,32 +476,12 @@ int ha_fizzbuzz::rnd_next(uchar *buf) {
   // bufを0埋めする
   memset(buf, 0, table->s->null_bytes);
 
-  if (now_pos < 100) {
-    ++now_pos;
-
-    DBUG_PRINT("info", ("now_pos: %d", now_pos));
+  if (stats.records < stored_records.size()) {
     // フィールドごとに演算の対応を行う
     for (Field **field = table->field; *field; field++) {
       buffer.length(0);
-
-      // fizzbuzz の判定
-      if (now_pos % 3 == 0 && now_pos % 5 == 0) {
-        for (const char* p = "fizzbuzz"; *p; ++p) {
-          buffer.append(*p);
-        }
-      } else if (now_pos % 3 == 0) {
-        for (const char* p = "fizz"; *p; ++p) {
-          buffer.append(*p);
-        }
-      } else if (now_pos % 5 == 0) {
-        for (const char* p = "buzz"; *p; ++p) {
-          buffer.append(*p);
-        }
-      } else {
-        std::string s = std::to_string(now_pos);
-        for (const char* p = s.data(); *p; ++p) {
-          buffer.append(*p);
-        }
+      for (auto c : stored_records[stats.records]) {
+        buffer.append(c);
       }
       (*field)->store(buffer.ptr(), buffer.length(), buffer.charset(), CHECK_FIELD_IGNORE);
     }

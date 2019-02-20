@@ -69,6 +69,7 @@ class ha_fizzbuzz : public handler {
   String buffer;
   int now_pos;
   bool stop;
+  std::vector<std::string> stored_records;
 
  public:
   ha_fizzbuzz(handlerton *hton, TABLE_SHARE *table_arg);
