@@ -1,4 +1,4 @@
-FROM mysql:8.0.14
+FROM mysql:8.0.15
 
 ENV CMAKE_VERSION 3.13.3
 
@@ -24,9 +24,7 @@ RUN mkdir /tmp/cmake && \
   make install && \
   rm -rf /tmp/cmake
 
-WORKDIR /opt
-RUN git clone --single-branch --branch mysql-8.0.14 --depth 1 https://github.com/mysql/mysql-server.git
 WORKDIR /opt/mysql-server
+ADD mysql-server /opt/mysql-server
 # build mysql-server
-RUN cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp/boost -DFORCE_INSOURCE_BUILD=1
-ADD dev/*.sh ./
+RUN cmake /opt/mysql-server -DDOWNLOAD_BOOST=1 -DWITH_BOOST=/tmp/boost -DFORCE_INSOURCE_BUILD=1

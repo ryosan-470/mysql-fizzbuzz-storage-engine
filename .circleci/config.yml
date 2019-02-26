@@ -1,6 +1,7 @@
 version: 2.1
 executors:
   default:
+    working_directory: /opt
     docker:
       - image: ryosan470/mysql-dev-docker:ca94b993454c86be248fbe180db94647488114e9
 
@@ -15,12 +16,12 @@ jobs:
           command: |
             rm -rf /opt/mysql-server/storage/*
             cp -r /opt/src/* /opt/mysql-server/storage/
+            cp -r /opt/dev /opt/mysql-server/
             ls -la /opt/mysql-server/storage/
       - run:
           name: build source code
           command: |
-            cmake .
-            make fizzbuzz
+            ./dev/build.sh
           working_directory: /opt/mysql-server
 
 workflows:
