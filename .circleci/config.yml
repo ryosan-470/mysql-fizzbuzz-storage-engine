@@ -1,0 +1,41 @@
+version: 2.1
+executors:
+  default:
+    working_directory: /opt/mysql-server
+    docker:
+      - image: ryosan470/mysql-dev-docker:ca94b993454c86be248fbe180db94647488114e9
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD: true
+
+jobs:
+  test:
+    executor:
+      name: default
+    steps:
+      - checkout:
+          path: /code
+      - run:
+          name: copy my custom storage engine
+          command: |
+            rm -rf storage/*
+            cp -r /code/src/* storage/
+            cp -r /code/dev ./
+            ls -la /opt/mysql-server/storage/*
+      - run:
+          name: Lannch mysql server
+          command: |
+            /entrypoint.sh mysqld
+          background: true
+      - run:
+          name: build source code
+          command: |
+            ./dev/build.sh
+      - run:
+          name: install plugin
+          command: |
+            ./dev/install_plugin.sh
+
+workflows:
+  pr:
+    jobs:
+      - test
