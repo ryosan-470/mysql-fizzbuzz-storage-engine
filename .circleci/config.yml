@@ -4,6 +4,8 @@ executors:
     working_directory: /opt/mysql-server
     docker:
       - image: ryosan470/mysql-dev-docker:ca94b993454c86be248fbe180db94647488114e9
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD: true
 
 jobs:
   test:
@@ -12,7 +14,6 @@ jobs:
     steps:
       - checkout:
           path: /code
-
       - run:
           name: copy my custom storage engine
           command: |
@@ -23,7 +24,8 @@ jobs:
       - run:
           name: Lannch mysql server
           command: |
-            ./dev/serve.sh
+            /entrypoint.sh mysqld
+          background: true
       - run:
           name: build source code
           command: |
