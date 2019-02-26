@@ -1,7 +1,7 @@
 version: 2.1
 executors:
   default:
-    working_directory: /code
+    working_directory: /opt/mysql-server
     docker:
       - image: ryosan470/mysql-dev-docker:ca94b993454c86be248fbe180db94647488114e9
 
@@ -10,19 +10,28 @@ jobs:
     executor:
       name: default
     steps:
-      - checkout
+      - checkout:
+          path: /code
+
       - run:
           name: copy my custom storage engine
           command: |
-            rm -rf /opt/mysql-server/storage/*
-            cp -r /code/src/* /opt/mysql-server/storage/
-            cp -r /code/dev /opt/mysql-server/
-            ls -la /opt/mysql-server/storage/
+            rm -rf storage/*
+            cp -r /code/src/* storage/
+            cp -r /code/dev ./
+            ls -la /opt/mysql-server/storage/*
+      - run:
+          name: Lannch mysql server
+          command: |
+            ./dev/serve.sh
       - run:
           name: build source code
           command: |
             ./dev/build.sh
-          working_directory: /opt/mysql-server
+      - run:
+          name: install plugin
+          command: |
+            ./dev/install_plugin.sh
 
 workflows:
   pr:
